@@ -22,4 +22,4 @@ RUN service mysql start &&\
 
 EXPOSE 3306
 
-CMD ["service mysql start"]
+CMD service mysql start
