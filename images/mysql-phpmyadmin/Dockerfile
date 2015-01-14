@@ -1,31 +1,25 @@
-FROM ubuntu:14.04
+FROM bobxiong/ubuntu:latest
 MAINTAINER Bob Xiong <hust.xzj@gmail.com>
 
-RUN dpkg-divert --local --rename --add /sbin/initctl
-RUN ln -sf /bin/true /sbin/initctl
+RUN sudo apt-get install -y mysql-server nginx
 
-# Let the conatiner know that there is no tty
-ENV DEBIAN_FRONTEND noninteractive
+RUN sudo apt-get install -y php5 php5-mysql php5-gd php5-fpm php5-cgi php-apc php5-curl \
+    php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming \
+    php5-ps php5-pspell php5-recode php5-sqlite php5-tidy php5-xmlrpc php5-xsl \
 
-RUN rm /etc/apt/sources.list
-ADD ./sources.list /etc/apt/sources.list
-
-RUN apt-get update
-RUN apt-get -y install mysql-server mysql-client libmysqlclient-dev apache2 php5 libapache2-mod-php5 php5-mcrypt
+RUN rm /etc/nginx/sites-available/default
+ADD ./default /etc/nginx/sites-available/default
 
 # mysql config
 RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
 
-
-
 RUN mysqld & \
-    	service apache2 start; \
 	sleep 5; \
 	printf y\\n\\n\\n1\\n | apt-get install -y phpmyadmin; \
 	sleep 15; \
 	mysqladmin -u root shutdown
 
-RUN sed -i "s#// \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#g" /etc/phpmyadmin/config.inc.php 
+# RUN sed -i "s#// \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#g" /etc/phpmyadmin/config.inc.php 
 
 RUN service mysql start &&\
     mysql -e "grant all privileges on *.* to 'root'@'%' identified by 'root';"&&\
@@ -34,5 +28,7 @@ RUN service mysql start &&\
 EXPOSE 80
 EXPOSE 3306
 
-CMD mysqld_safe & \
-	service apache2 start;
+CMD nginx & \
+    mysqld_safe;
+#CMD mysqld_safe & \
+#	service apache2 start;
