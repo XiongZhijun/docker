@@ -5,7 +5,7 @@ RUN sudo apt-get install -y mysql-server nginx
 
 RUN sudo apt-get install -y php5 php5-mysql php5-gd php5-fpm php5-cgi php-apc php5-curl \
     php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming \
-    php5-ps php5-pspell php5-recode php5-sqlite php5-tidy php5-xmlrpc php5-xsl \
+    php5-ps php5-pspell php5-recode php5-sqlite php5-tidy php5-xmlrpc php5-xsl 
 
 RUN rm /etc/nginx/sites-available/default
 ADD ./default /etc/nginx/sites-available/default
@@ -29,6 +29,5 @@ EXPOSE 80
 EXPOSE 3306
 
 CMD nginx & \
+    /etc/init.d/php5-fpm restart & \
     mysqld_safe;
-#CMD mysqld_safe & \
-#	service apache2 start;
