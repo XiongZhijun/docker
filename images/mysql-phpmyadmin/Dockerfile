@@ -16,17 +16,20 @@ RUN apt-get -y install mysql-server mysql-client libmysqlclient-dev apache2 php5
 # mysql config
 RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
 
-RUN service mysql start &&\
-    mysql -e "grant all privileges on *.* to 'root'@'%' identified by 'root';"&&\
-    mysql -e "grant all privileges on *.* to 'root'@'localhost' identified by 'root';"
 
-RUN service apache2 start; \
+
+RUN mysqld & \
+    	service apache2 start; \
 	sleep 5; \
 	printf y\\n\\n\\n1\\n | apt-get install -y phpmyadmin; \
 	sleep 15; \
 	mysqladmin -u root shutdown
 
 RUN sed -i "s#// \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#g" /etc/phpmyadmin/config.inc.php 
+
+RUN service mysql start &&\
+    mysql -e "grant all privileges on *.* to 'root'@'%' identified by 'root';"&&\
+    mysql -e "grant all privileges on *.* to 'root'@'localhost' identified by 'root';"
 
 EXPOSE 80
 EXPOSE 3306
