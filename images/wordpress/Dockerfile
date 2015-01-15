@@ -22,18 +22,17 @@ RUN mysqld & \
 # RUN sed -i "s#// \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;#g" /etc/phpmyadmin/config.inc.php 
 
 RUN mkdir -p /var/www/nginx/wordpress
-RUN link -s /usr/share/phpmyadmin /var/www/nginx/phpmyadmin
+RUN ln -s /usr/share/phpmyadmin /var/www/nginx/phpmyadmin
 ADD ./wordpress/ /var/www/nginx/wordpress/
 ADD ./wordpress-db /tmp/wordpress-db
 
 RUN service mysql start &&\
-    mysql -e "grant all privileges on *.* to 'root'@'%' identified by 'root';"&&\
-    mysql -e "grant all privileges on *.* to 'root'@'localhost' identified by 'root';"&&\
     mysql -e "CREATE DATABASE IF NOT EXISTS wordpress default charset utf8 COLLATE utf8_general_ci;"&&\
+    mysql -e "source /tmp/wordpress-db;"&&\
     mysql -e "grant all privileges on wordpress.* to 'wordpress'@'%' identified by 'wordpress';"&&\
-    mysql -e "grant all privileges on wordpress.* to 'wordpress'@'localhost' identified by 'wordpress';"&&\
-    mysql -e "source /tmp/wordpress-db;"
+    mysql -e "grant all privileges on wordpress.* to 'wordpress'@'localhost' identified by 'wordpress';"
 
+EXPOSE 81
 EXPOSE 80
 EXPOSE 3306
 
