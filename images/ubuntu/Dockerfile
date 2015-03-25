@@ -11,4 +11,4 @@ RUN rm /etc/apt/sources.list
 ADD ./sources.list /etc/apt/sources.list
 
 RUN apt-get update
-RUN apt-get -y upgrade
+# RUN apt-get -y upgrade
